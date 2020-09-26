@@ -1,0 +1,30 @@
+.button{
+background-color: aquamarine;
+color:navy;
+/* width: 120px; */
+border-radius: 15px 50px;
+}
+
+.clueOuter {
+    background-color: azure;
+    color: black;
+    font-family: 'Arial';
+    left: 30px;
+    margin:10px;
+  }
+
+.clueOuterInPlay {
+      filter: opacity(1)
+  }
+
+.clueOuterNotInPlay {
+    filter: opacity(0.025)
+}
+
+.hideBlock {
+    display: none;
+}
+
+.showBlock {
+    display: block;
+}

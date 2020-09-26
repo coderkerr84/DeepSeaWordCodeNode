@@ -1,0 +1,17 @@
+.background {
+    background-image: url("/images/undersea_1.jpg");
+    background-size: auto;
+    /* background-repeat: round; */
+    /* width: fit-content; */
+    height: fit-content;
+    background-size: cover;
+    width: 100vw;
+ }
+
+ .center-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
