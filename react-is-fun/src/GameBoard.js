@@ -227,6 +227,7 @@ var instructionsStyle = {
     fontSize: '12px',
     // margin: '20px 200px 40px 200px',
     padding: '20px',
+    
     textAlign: 'center',
     // readme: better on mobile if no % here
     // width: '60%'
