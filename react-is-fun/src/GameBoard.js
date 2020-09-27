@@ -32,7 +32,7 @@ class GameBoard extends React.Component
 
       this.updateWordFeedback(thisRoundNumber,'Checking dictionary...');
 
-      fetch('https://deepseawordservice.azurewebsites.net/Entries/LookupWord?word=' + userGuess)
+      fetch('https://deepseaworddotnetservice.azurewebsites.net/Entries/LookupWord?word=' + userGuess)
         .then(res => res.json())
         .then((data) => {
           //this.setState({ clues: data })
@@ -99,7 +99,7 @@ class GameBoard extends React.Component
 
      componentDidMount() {
       this.setState({ isLoadingPage: true });
-        fetch('https://deepseawordservice.azurewebsites.net/Entries/GetWordWithClues')
+        fetch('https://deepseaworddotnetservice.azurewebsites.net/Entries/GetWordWithClues')
           .then(res => res.json())
           .then((data) => {
             this.setState({ clues: data, isLoadingPage: false })
