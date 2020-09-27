@@ -3,6 +3,5 @@
         "node_modules{,/**}",
         ".vscode{,/**}"
     ],
-    "appService.deploySubpath": ".",
     "appService.defaultWebAppToDeploy": "/subscriptions/71c6b4a5-7e14-4712-9562-bcc7e22e60b3/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/DeepSeaWordNodeSite"
 }
