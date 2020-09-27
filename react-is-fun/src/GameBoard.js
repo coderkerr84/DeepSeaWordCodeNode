@@ -228,7 +228,8 @@ var instructionsStyle = {
     // margin: '20px 200px 40px 200px',
     padding: '20px',
     textAlign: 'center',
-    width: '60%'
+    // readme: better on mobile if no % here
+    // width: '60%'
 }
 
 var style = {
