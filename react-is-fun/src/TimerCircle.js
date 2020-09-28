@@ -37,7 +37,10 @@ let roundTheyWereOnWhenTimerExpired = null;
 
 function Init(uniqueKey)
 {
-        onTimesUp();
+        // INIT;
+        timerInterval =  Array(7).fill(null);
+
+        onTimesUp(uniqueKey);
 
         /*
         * readme: bring these two back in if you want the timer to NOT be shared across all rounds
@@ -52,6 +55,13 @@ function Init(uniqueKey)
         startTimer(uniqueKey);
 }
 
+function ResetTimer()
+{
+  //readme: reset the shared static timer vars - be careful when calling this as don't want to reset in between rounds 
+  timePassed = 0;
+  timeLeft = TIME_LIMIT;
+}
+
 function AddToTimer(sec)
 {
     console.log('timePassed'+ timePassed);
@@ -64,22 +74,34 @@ function onTimesUp(uniqueKey) {
 
 function startTimer(uniqueKey) {
     timerInterval[uniqueKey] = setInterval(() => {
-    timePassed = timePassed += 1;
-    timeLeft = TIME_LIMIT - timePassed;
-    document.getElementById("base-timer-label" + uniqueKey).innerHTML = formatTime(
-      timeLeft
-    );
-    setCircleDasharray(uniqueKey);
-    setRemainingPathColor(timeLeft,uniqueKey);
+    if(document.getElementById("base-timer-label" + uniqueKey))
+    {
+      timePassed = timePassed += 1;
+      timeLeft = TIME_LIMIT - timePassed;
+      // readme: only do stuff if html rendered
 
-    if (timeLeft === 0) {
+        document.getElementById("base-timer-label" + uniqueKey).innerHTML = formatTime(
+          timeLeft
+        );
+        setCircleDasharray(uniqueKey);
+        setRemainingPathColor(timeLeft,uniqueKey);
+
+        if (timeLeft === 0) {
+          onTimesUp(uniqueKey);
+          if(timerRanOutCallback != null && timerRanOutCallback != undefined 
+            && uniqueKey != null && uniqueKey != undefined)
+          {
+            timerRanOutCallback(uniqueKey);
+            roundTheyWereOnWhenTimerExpired = uniqueKey;
+            // readme: so if the timer runs out, then here I reset the timers for the next time they might be used
+            ResetTimer();
+          }
+        }
+    } else
+    {
+      // readme: hmm, I dont fully understand this - assume this else hit when doing a "Replay" and clears out stuff ahead of reusing timer class vars
+      ResetTimer();
       onTimesUp(uniqueKey);
-      if(timerRanOutCallback != null && timerRanOutCallback != undefined 
-        && uniqueKey != null && uniqueKey != undefined)
-      {
-        timerRanOutCallback(uniqueKey);
-        roundTheyWereOnWhenTimerExpired = uniqueKey;
-      }
     }
   }, 1000);
 }

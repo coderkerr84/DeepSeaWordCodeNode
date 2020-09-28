@@ -4,7 +4,7 @@ import ClueOuterList from './ClueOuterList';
 import './GameBoard.css';
 import ClueOuter from './ClueOuter';
 import Spinner from './Loader';
-
+import UserName from './UserName';
 class GameBoard extends React.Component
 { 
     // const [currentRoundBeingPlayed, setCount] = useState(1);
@@ -18,7 +18,8 @@ class GameBoard extends React.Component
           clues: null,
           roundTheyWereOnWhenTimerExpired: null,
           isLoadingPage: true,
-          wordLookupFeedbackMessages: Array(7).fill(null)
+          wordLookupFeedbackMessages: Array(7).fill(null),
+          userName: ""
         };
       }
 
@@ -38,7 +39,7 @@ class GameBoard extends React.Component
           //this.setState({ clues: data })
           if(data != null)
           {
-            console.log('word def:' + data.definition);
+            //console.log('word def:' + data.definition);
             // readme: word was a real word.
             this.updateWordFeedback(thisRoundNumber,'Found in dictionary.');
             this.setState({currentRound: thisRoundNumber+1});
@@ -64,6 +65,11 @@ class GameBoard extends React.Component
       {
         this.updateWordFeedback(thisRoundNumber,'Apparatus failure. Try again')
       });
+    }
+
+    handleReplay = () => {
+      this.componentDidMount()
+      //this.render();
     }
 
       handleSubmitAndDiveClick = (thisRoundNumber) => {
@@ -92,13 +98,27 @@ class GameBoard extends React.Component
         this.setState({userGuesses: userGuessesCopy});
      }
 
+     handleEnterUserName = (theirUserName) => {
+       this.setState({userName: theirUserName});
+     }
+
      handleTimerRanOut = (i) => {
         this.setState({roundTheyWereOnWhenTimerExpired: i})
         //todo: drown him!
      }
 
      componentDidMount() {
-      this.setState({ isLoadingPage: true });
+      this.setState({
+        userGuesses: Array(7).fill(null),
+        currentRound: 1,
+        oxygenBottlesUsed: 0,
+        initializeTimers: Array(7).fill(null),
+        clues: null,
+        roundTheyWereOnWhenTimerExpired: null,
+        isLoadingPage: true,
+        wordLookupFeedbackMessages: Array(7).fill(null)
+        //userName: ""
+      });
         fetch('https://deepseaworddotnetservice.azurewebsites.net/Entries/GetWordWithClues')
           .then(res => res.json())
           .then((data) => {
@@ -130,8 +150,9 @@ class GameBoard extends React.Component
                     High scores require: speed, valid words, limited oxygen refills 
                     and finding that treasure!
                     
-                    {this.state.isLoadingPage ? <Spinner/> : this.renderClues(parsedClues2)}
+                    {this.state.isLoadingPage || this.state.userName == "" ? <div><Spinner/><UserName changeUserName={this.handleEnterUserName}/></div>  : this.renderClues(parsedClues2)}
                 </div>
+                <input type="button" onClick={this.handleReplay} value="Replay"></input>
             </div>
             )
         }
@@ -227,7 +248,7 @@ var instructionsStyle = {
     fontSize: '12px',
     // margin: '20px 200px 40px 200px',
     padding: '20px',
-    
+
     textAlign: 'center',
     // readme: better on mobile if no % here
     // width: '60%'
@@ -257,7 +278,7 @@ var style = {
 var titleStyle = {
     //backgroundColor: 'lightblue',
     color: 'yellow',
-    fontFamily: 'Phosphate',
+    fontFamily: 'Phosphate,Futura,Rockwell',
     fontSize: '45px',
     textAlign: 'Center',
     top: '0px'

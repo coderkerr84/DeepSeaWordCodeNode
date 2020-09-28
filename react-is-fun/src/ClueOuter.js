@@ -8,12 +8,14 @@ import TimerCircle from './TimerCircle.js';
 
 class ClueOuter extends React.Component
 {
+
     render(){
         let clue = this.props.clue;
         let thisRoundId = clue.roundId;
         let userGuess = this.props.userGuess;
         let clueOuterClassName = this.props.currentRoundBeingPlayed >= thisRoundId ? "clueOuterInPlay clueOuter" : "clueOuterNotInPlay clueOuter";
-        let diverClassName = this.props.currentRoundBeingPlayed == thisRoundId ? "showBlock" : "hideBlock";
+        let isThisTheCurrentRound = this.props.currentRoundBeingPlayed == thisRoundId;
+        let diverClassName = isThisTheCurrentRound ? "showBlock" : "hideBlock";
         let isDiverDead = this.props.roundTheyWereOnWhenTimerExpired != null;
         let diverDisplay = DiverDisplayFunction(this.props.initializeTimers[clue.roundId - 1],this.props.roundTheyWereOnWhenTimerExpired, clue.roundId);
 
@@ -29,9 +31,10 @@ class ClueOuter extends React.Component
             }
             return '';
         }
-
-        //console.log(clue.clue);
+        const OXYGEN_BOTTLES_AVAILABLE = 5;
+        //console.log("lol :" +isThisTheCurrentRound);
         return(
+        
         <div className={clueOuterClassName}>
             <div style={roundStyle}>
                 {clue.roundId}
@@ -40,7 +43,7 @@ class ClueOuter extends React.Component
             {/* readme: this below probably should be another Component */}
             <div style={inlineBlock} name={"ClueOuterDiv" + clue.roundId}>
                 <div style={floatLeft}>
-                    {ClueInner(clue, this.props.changeUserGuess, this.props.wordLookupFeedbackMessages[clue.roundId-1])}
+                    {ClueInner(clue, this.props.changeUserGuess, this.props.wordLookupFeedbackMessages[clue.roundId-1], isThisTheCurrentRound)}
                 </div>
                 <TimerCircle 
                     initializeTimers={this.props.initializeTimers} 
@@ -58,19 +61,20 @@ class ClueOuter extends React.Component
                 </div>
                 <div style={floatRight}>
                     <div style={buttonPadding}>
-                        <button className="button" style={{backgroundColor:"coral"}} tabIndex={clue.roundId + "1"}  onClick={(event) => this.props.onClick(clue.roundId)}>
+                        <button disabled={!isThisTheCurrentRound} className="button" style={{backgroundColor:"coral"}} tabIndex={clue.roundId + "1"}  onClick={(event) => this.props.onClick(clue.roundId)}>
                             {clue.roundId == 7 ? "Complete!" : "Submit And Dive"}
                         </button>
                     </div>
                     <div style={buttonPadding}>
-                        <button className="button" style={{backgroundColor:"antiquewhite"}} onClick={function() { alert('Resurface'); }}>
+                        <button disabled={!isThisTheCurrentRound}  className="button" style={{backgroundColor:"antiquewhite"}} onClick={function() { alert('Resurface'); }}>
                                 Resurface
                         </button>
                     </div>
                     <div style={buttonPadding}>
-                        <button className="button" onClick={(event) => this.props.onClickOxygen(clue.roundId)}>
+                        <button disabled={!isThisTheCurrentRound || (OXYGEN_BOTTLES_AVAILABLE - this.props.oxygenBottlesUsed) < 1} className="button" onClick={(event) => this.props.onClickOxygen(clue.roundId)}>
                                 Refill O<sub>2</sub> (+10s)
                         </button>
+                        <span style={displayBlock}>{ (OXYGEN_BOTTLES_AVAILABLE - this.props.oxygenBottlesUsed) + "+ bottles remain"}</span>
                     </div>
                 </div>
             </div>
@@ -80,13 +84,13 @@ class ClueOuter extends React.Component
 }
 
 // readme: this was once a separate component but I was having to pass from parent to child to child and it felt messy
-function ClueInner(clue, onChange, wordLookupFeedbackMessage){
-    // console.log(clue.roundId);
+function ClueInner(clue, onChange, wordLookupFeedbackMessage, isThisTheCurrentRound){
+    // console.log(clue.roundId);   
     return (
         <div className='ClueInner' style={style}>
             <label className='ClueInnerLabel'>{clue.clueText}</label>
             
-            <UserGuess changeUserGuess={onChange} clueId={clue.roundId} wordLookupFeedbackMessage={wordLookupFeedbackMessage}/>  
+            <UserGuess isThisTheCurrentRound={isThisTheCurrentRound} changeUserGuess={onChange} clueId={clue.roundId} wordLookupFeedbackMessage={wordLookupFeedbackMessage}/>  
 
             {/* consider making this ClueScores into another component?    */}
             {/* <div className='ClueScores' style={textAlignLeft}>                
@@ -165,6 +169,10 @@ var buttonPadding = {
   var floatLeft = {
     float: 'left',
     width: '33%'
+  }
+
+  var displayBlock={
+    display: 'block'
   }
 
   var displayNone ={
