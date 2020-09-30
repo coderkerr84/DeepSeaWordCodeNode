@@ -5,6 +5,8 @@ import './GameBoard.css';
 import ClueOuter from './ClueOuter';
 import Spinner from './Loader';
 import UserName from './UserName';
+import ResultsModal from './ResultsModal';
+
 class GameBoard extends React.Component
 { 
     // const [currentRoundBeingPlayed, setCount] = useState(1);
@@ -19,7 +21,9 @@ class GameBoard extends React.Component
           roundTheyWereOnWhenTimerExpired: null,
           isLoadingPage: true,
           wordLookupFeedbackMessages: Array(7).fill(null),
-          userName: ""
+          userName: "",
+          showModal: false,
+          dictionaryCheckInProgress: false
         };
       }
 
@@ -30,9 +34,21 @@ class GameBoard extends React.Component
      }
 
      checkWord(thisRoundNumber,userGuess){
-
+      console.log(thisRoundNumber + " checkWord : " +userGuess )
       this.updateWordFeedback(thisRoundNumber,'Checking dictionary...');
 
+      if(userGuess == "" || userGuess == null)
+      {
+        this.updateWordFeedback(thisRoundNumber,'Enter word then Submit and Dive');
+        return false;
+      }
+      if(this.state.dictionaryCheckInProgress)
+      {
+        this.updateWordFeedback(thisRoundNumber,'Double-clickers will be left behind!');
+        return false;
+      }
+
+      this.setState({dictionaryCheckInProgress: true}); 
       fetch('https://deepseaworddotnetservice.azurewebsites.net/Entries/LookupWord?word=' + userGuess)
         .then(res => res.json())
         .then((data) => {
@@ -51,14 +67,18 @@ class GameBoard extends React.Component
             {
               //readme: kick-off the completion code.
               //perform scoring and open lightbox to display response to that?
-              alert('You were searching for : ' + this.state.clues.temporaryWord
-              + '\n' + 'And used oxygen bottles : ' + this.state.oxygenBottlesUsed);
+              this.setState({showModal: true});
+              // gather up their state data
+              // do a fetch/Post of their data 
+              // throw up a light box with a spinner while they wait
+              // display their results
             }
           }
           else
           {
             this.updateWordFeedback(thisRoundNumber,'NOT found - try another!');
           }
+          this.setState({dictionaryCheckInProgress: false}); 
 
       })
       .catch( ()=>
@@ -74,8 +94,17 @@ class GameBoard extends React.Component
 
       handleSubmitAndDiveClick = (thisRoundNumber) => {
         //readme: checking the word is good before advancing
-        this.checkWord(thisRoundNumber, this.state.userGuesses[thisRoundNumber-1]);
-      };
+
+          if(this.state.initializeTimers[0] == null)
+          {
+            alert("Please click the diver image to start the timer \n  ");
+          }
+          else
+          {
+            this.checkWord(thisRoundNumber, this.state.userGuesses[thisRoundNumber-1]);
+          }
+
+    };
 
       handleDiverClick = (thisRoundNumber) =>{
           //alert('Clicked on diver' + thisRoundNumber);
@@ -87,7 +116,7 @@ class GameBoard extends React.Component
 
       handleOxygenClick = (thisRoundNumber) => {
         //readme: not sure if I'll want to count which round the oxygen was used in, might leave param there til i decide
-          let oxygenBottlesUsedNew = this.state.oxygenBottlesUsed + 1;
+        let oxygenBottlesUsedNew = this.state.oxygenBottlesUsed + 1;
         this.setState({oxygenBottlesUsed: oxygenBottlesUsedNew});
       };
       
@@ -108,6 +137,7 @@ class GameBoard extends React.Component
      }
 
      componentDidMount() {
+       // readme: resets all state except username and then fetch a new word
       this.setState({
         userGuesses: Array(7).fill(null),
         currentRound: 1,
@@ -116,10 +146,13 @@ class GameBoard extends React.Component
         clues: null,
         roundTheyWereOnWhenTimerExpired: null,
         isLoadingPage: true,
-        wordLookupFeedbackMessages: Array(7).fill(null)
+        wordLookupFeedbackMessages: Array(7).fill(null),
+        showModal: false,
+        dictionaryCheckInProgress: false
         //userName: ""
       });
-        fetch('https://deepseaworddotnetservice.azurewebsites.net/Entries/GetWordWithClues')
+        
+      fetch('https://deepseaworddotnetservice.azurewebsites.net/Entries/GetWordWithClues')
           .then(res => res.json())
           .then((data) => {
             this.setState({ clues: data, isLoadingPage: false })
@@ -152,7 +185,9 @@ class GameBoard extends React.Component
                     
                     {this.state.isLoadingPage || this.state.userName == "" ? <div><Spinner/><UserName changeUserName={this.handleEnterUserName}/></div>  : this.renderClues(parsedClues2)}
                 </div>
-                <input type="button" onClick={this.handleReplay} value="Replay"></input>
+                
+                {this.state.clues != null ? <ResultsModal temporaryWord={this.state.clues.temporaryWord} oxygenBottlesUsed={this.state.oxygenBottlesUsed} showModal={this.state.showModal} handleReplay={this.handleReplay}/> : <br/>}
+   
             </div>
             )
         }

@@ -55,8 +55,9 @@ function Init(uniqueKey)
         startTimer(uniqueKey);
 }
 
-function ResetTimer()
+function ResetTimer(calledBy)
 {
+  console.log("ResetTimer " + calledBy)
   //readme: reset the shared static timer vars - be careful when calling this as don't want to reset in between rounds 
   timePassed = 0;
   timeLeft = TIME_LIMIT;
@@ -94,13 +95,13 @@ function startTimer(uniqueKey) {
             timerRanOutCallback(uniqueKey);
             roundTheyWereOnWhenTimerExpired = uniqueKey;
             // readme: so if the timer runs out, then here I reset the timers for the next time they might be used
-            ResetTimer();
+            ResetTimer("bcoz timer expired on " + uniqueKey);
           }
         }
     } else
     {
       // readme: hmm, I dont fully understand this - assume this else hit when doing a "Replay" and clears out stuff ahead of reusing timer class vars
-      ResetTimer();
+      ResetTimer("bcoz didn't find a timer for " + uniqueKey);
       onTimesUp(uniqueKey);
     }
   }, 1000);
@@ -152,10 +153,16 @@ function setCircleDasharray(uniqueKey) {
 
 class TimerCircle extends React.Component
 { 
-    // readme: dont appear to need each Timer to have their own state.
+    // readme: dont appear to need each Tier to have their own state.
     // am happy sharing the timer variables globally across all Timers (e.g. TimePassed and oxygenBottlesApplied are used by all 7)
 render()
     {
+      if(this.props.initializeTimers[0] == null)
+      {
+        // readme: bit of an assumption - if the first timer is null, the game has been started or replayed so reset timer.
+        ResetTimer("Init.");
+      }
+
       timerRanOutCallback = this.props.timerRanOut;
         //console.log('Got here' + this.props.initializeTimers[this.props.uniqueKey - 1] + ' ' + this.props.uniqueKey);
         

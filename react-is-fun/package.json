@@ -6,6 +6,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-loader-spinner": "^3.1.14",
+    "react-modal": "^3.11.2",
     "react-scripts": "^3.4.3"
   },
   "devDependencies": {},
