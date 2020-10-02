@@ -23,7 +23,9 @@ class GameBoard extends React.Component
           wordLookupFeedbackMessages: Array(7).fill(null),
           userName: "",
           showModal: false,
-          dictionaryCheckInProgress: false
+          dictionaryCheckInProgress: false,
+          scoringData: null,
+          scoreLoading: false
         };
       }
 
@@ -49,7 +51,9 @@ class GameBoard extends React.Component
       }
 
       this.setState({dictionaryCheckInProgress: true}); 
-      fetch('https://deepseaworddotnetservice.azurewebsites.net/Entries/LookupWord?word=' + userGuess)
+      
+      //https://deepseaworddotnetservice.azurewebsites.net/Entries
+      fetch('http://deepseaworddotnetservice.azurewebsites.net/Entries/LookupWord?word=' + userGuess)
         .then(res => res.json())
         .then((data) => {
           //this.setState({ clues: data })
@@ -68,10 +72,7 @@ class GameBoard extends React.Component
               //readme: kick-off the completion code.
               //perform scoring and open lightbox to display response to that?
               this.setState({showModal: true});
-              // gather up their state data
-              // do a fetch/Post of their data 
-              // throw up a light box with a spinner while they wait
-              // display their results
+              this.SendToScoringService();  
             }
           }
           else
@@ -85,6 +86,51 @@ class GameBoard extends React.Component
       {
         this.updateWordFeedback(thisRoundNumber,'Apparatus failure. Try again')
       });
+    }
+
+    SendToScoringService = () => {
+
+              this.setState({scoreLoading: true});
+              let clueInfo = Array(7).fill(null);
+              clueInfo = this.state.clues.clues.map(item => item.significantClueInfo)
+
+              const formData = new FormData();
+
+              formData.append('GUID', this.state.clues.guid);
+              formData.append('userName', this.state.userName);
+              //readme: replace 14 lines these with LOOPS!
+              formData.append('userGuesses[0]', this.state.userGuesses[0]);
+              formData.append('userGuesses[1]', this.state.userGuesses[1]);
+              formData.append('userGuesses[2]', this.state.userGuesses[2]);
+              formData.append('userGuesses[3]', this.state.userGuesses[3]);
+              formData.append('userGuesses[4]', this.state.userGuesses[4]);
+              formData.append('userGuesses[5]', this.state.userGuesses[5]);
+              formData.append('userGuesses[6]', this.state.userGuesses[6]);
+              formData.append('clueInfo[0]', clueInfo[0]);
+              formData.append('clueInfo[1]', clueInfo[1]);
+              formData.append('clueInfo[2]', clueInfo[2]);
+              formData.append('clueInfo[3]', clueInfo[3]);
+              formData.append('clueInfo[4]', clueInfo[4]);
+              formData.append('clueInfo[5]', clueInfo[5]);
+              formData.append('clueInfo[6]', clueInfo[6]);
+              formData.append('oxygenUsed', this.state.oxygenBottlesUsed);
+
+              //http://deepseaworddotnetservice.azurewebsites.net
+              fetch('http://deepseaworddotnetservice.azurewebsites.net/Entries/SubmitForScoring/', {
+                    method: 'POST',
+                    body: formData
+                  })
+                  .then(response => response.json())
+                  .then(data => {
+
+                    this.setState({scoreLoading: false, scoreData: data});
+                    //this.renderScore(data);
+                    //{this.state.scoreLoading ? <Spinner/> : this.renderScore(data)};
+
+                  });
+
+              // throw up a light box with a spinner while they wait
+              // display their results
     }
 
     handleReplay = () => {
@@ -148,11 +194,13 @@ class GameBoard extends React.Component
         isLoadingPage: true,
         wordLookupFeedbackMessages: Array(7).fill(null),
         showModal: false,
-        dictionaryCheckInProgress: false
+        dictionaryCheckInProgress: false,
+        scoringData: null,
+        scoreLoading: false
         //userName: ""
       });
         
-      fetch('https://deepseaworddotnetservice.azurewebsites.net/Entries/GetWordWithClues')
+      fetch('http://deepseaworddotnetservice.azurewebsites.net/Entries/GetWordWithClues')
           .then(res => res.json())
           .then((data) => {
             this.setState({ clues: data, isLoadingPage: false })
@@ -183,13 +231,22 @@ class GameBoard extends React.Component
                     High scores require: speed, valid words, limited oxygen refills 
                     and finding that treasure!
                     
+                    
                     {this.state.isLoadingPage || this.state.userName == "" ? <div><Spinner/><UserName changeUserName={this.handleEnterUserName}/></div>  : this.renderClues(parsedClues2)}
+                    {this.renderScore()}
                 </div>
-                
-                {this.state.clues != null ? <ResultsModal temporaryWord={this.state.clues.temporaryWord} oxygenBottlesUsed={this.state.oxygenBottlesUsed} showModal={this.state.showModal} handleReplay={this.handleReplay}/> : <br/>}
    
             </div>
             )
+        }
+        renderScore()
+        {
+          console.log("renderScore(scoreData)")
+          return(
+              
+                  <ResultsModal scoreData={this.state.scoreData} userGuesses={this.state.userGuesses} oxygenBottlesUsed={this.state.oxygenBottlesUsed} showModal={this.state.showModal} handleReplay={this.handleReplay}/>
+              
+          );
         }
 
         renderClues(parsedClues)
@@ -232,48 +289,48 @@ class GameBoard extends React.Component
         }
 }
 
-function GetJson2()
-{
-  fetch('https://deepseaworddotnetcore.azurewebsites.net/Entries/GetWordWithClues')
-  .then(
-    function(response) {
-      if (response.status !== 200) {
-        console.log('Looks like there was a problem. Status Code: ' +
-          response.status);
-        return;
-      }
+// function GetJson2()
+// {
+//   fetch('https://localhost:5000/Entries/GetWordWithClues')
+//   .then(
+//     function(response) {
+//       if (response.status !== 200) {
+//         console.log('Looks like there was a problem. Status Code: ' +
+//           response.status);
+//         return;
+//       }
 
-      // Examine the text in the response
-      response.json().then(function(data) {
-        console.log(data);
-        return data;
-      });
-    }
-  )
-  .catch(function(err) {
-    console.log('Fetch Error :-S', err);
-  });
-}
+//       // Examine the text in the response
+//       response.json().then(function(data) {
+//         console.log(data);
+//         return data;
+//       });
+//     }
+//   )
+//   .catch(function(err) {
+//     console.log('Fetch Error :-S', err);
+//   });
+// }
 
-function GetJson()
-{
+// function GetJson()
+// {
 
-    var obj = {
-        table: []
-    }
-    // PIPE
-    obj.table.push({id: 1, clue: "Contains letter 'i'."});
-    obj.table.push({id: 2, clue: "Has fewer than 5 letters."});
-    obj.table.push({id: 3, clue: "Ends with 'e'"});
-    obj.table.push({id: 4, clue: "Syallable count : 1"});
-    obj.table.push({id: 5, clue: "Vowel count : 2"});
-    obj.table.push({id: 6, clue: "First letter 'P'"});
-    obj.table.push({id: 7, clue: "A cask usually containing two hogsheads or 126 gallons"});
+//     var obj = {
+//         table: []
+//     }
+//     // PIPE
+//     obj.table.push({id: 1, clue: "Contains letter 'i'."});
+//     obj.table.push({id: 2, clue: "Has fewer than 5 letters."});
+//     obj.table.push({id: 3, clue: "Ends with 'e'"});
+//     obj.table.push({id: 4, clue: "Syallable count : 1"});
+//     obj.table.push({id: 5, clue: "Vowel count : 2"});
+//     obj.table.push({id: 6, clue: "First letter 'P'"});
+//     obj.table.push({id: 7, clue: "A cask usually containing two hogsheads or 126 gallons"});
 
-    var json = JSON.stringify(obj);
+//     var json = JSON.stringify(obj);
     
-    return json;
-}
+//     return json;
+// }
 
 var instructionsStyle = {
     //backgroundColor: 'lightblue',

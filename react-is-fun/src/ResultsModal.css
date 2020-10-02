@@ -1,0 +1,30 @@
+.customOverlay {
+    background-image: url("/images/treasure.jpg");
+    background-size: auto;
+    /* background-repeat: round; */
+    /* width: fit-content; */
+    height: fit-content;
+    background-size: cover;
+    filter: opacity(0.3);
+    width: 100vw;
+ }
+
+table, th, td {
+    /* border: 1px dotted black; */
+    text-align: left;
+    overflow-x:auto;
+    margin: auto;
+}
+
+td {
+    text-align: center;
+}
+
+th, td {
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
+}
+
+tr:nth-child(even) {
+      background-color: #EEf9f0;
+}

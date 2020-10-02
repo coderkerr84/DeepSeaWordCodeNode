@@ -14,13 +14,13 @@ render()
             <label  style={style}>accept the risk in exploring the deep ocean.</label>
             <br/>
             <br/>
-            Click anywhere to advance.
+            <a href="#" style={{color:"aliceblue"}} >Then click anywhere to advance.</a>
         </div>  
     )
     }
 }
 var style = {
-    fontFamily: 'Phosphate,Futura,Rockwell',
+    fontFamily: 'Phosphate,Futura,Rockwell,Impact',
     margin: '5px 5px 0px 5px',
     padding: '5px',
     fontSize: "larger"
