@@ -120,6 +120,8 @@ var diverStyleDead ={
 }
 var diverSpanStyle={
     position: 'absolute',
+    left: '0',
+    right: '0',
     bottom: '4%'
 }
 var style = {

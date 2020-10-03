@@ -28,7 +28,7 @@ class ResultsModal extends React.Component {
               contentLabel="Minimal Modal Example"
               appElement={document.getElementById("root")}
               >
-                <Spinner/>
+              <div style={spinnerStyle}><Spinner/></div>
               </ReactModal>
         );
       }
@@ -40,33 +40,47 @@ class ResultsModal extends React.Component {
         clueScoringRows.push(
         <tr>
           <td>{this.props.userGuesses[index]}</td>
-          <td>{element.scorePerClue[0] > 0 ? SuccessImage() : FailImage()}</td>
-          <td>{element.scorePerClue[1] > 0 ? SuccessImage() : FailImage()}</td>
-          <td>{element.scorePerClue[2] > 0 ? SuccessImage() : FailImage()}</td>
-          <td>{element.scorePerClue[3] > 0 ? SuccessImage() : FailImage()}</td>
-          <td>{element.scorePerClue[4] > 0 ? SuccessImage() : FailImage()}</td>
-          <td>{element.scorePerClue[5] > 0 ? SuccessImage() : FailImage()}</td>
+          <td>{element.scorePerClue[0] > 0 ? SuccessImage() : FailImage(index, 0)}</td>
+          <td>{element.scorePerClue[1] > 0 ? SuccessImage() : FailImage(index, 1)}</td>
+          <td>{element.scorePerClue[2] > 0 ? SuccessImage() : FailImage(index, 2)}</td>
+          <td>{element.scorePerClue[3] > 0 ? SuccessImage() : FailImage(index, 3)}</td>
+          <td>{element.scorePerClue[4] > 0 ? SuccessImage() : FailImage(index, 4)}</td>
+          <td>{element.scorePerClue[5] > 0 ? SuccessImage() : FailImage(index, 5)}</td>
           <td>{"N/A"}</td>
         </tr>)
       }
 
       return (
-        <div className="backgroundTreasure" style={{backgroundColor:"antiquewhite"}}>
+        <div>
           
           <ReactModal 
              isOpen={this.props.showModal}
              contentLabel="Minimal Modal Example"
              appElement={document.getElementById("root")}
-             classNames={{
-              overlay: "customOverlay"
+             style={{
+              content: {
+                color: 'darkblue',
+                // backgroundImage: 'url(/images/treasure.jpg)',
+                // backgroundSize: 'auto'
+                backgroundColor: 'cornsilk',
+                overflow: 'scroll'
+              }
             }}
+            
           >
-            You were searching for : {this.props.scoreData.wordBeingSought}
+            You were searching for : <span style={resultStyle}>{this.props.scoreData.wordBeingSought}</span>
             <br/>
-            And used oxygen bottles : {this.props.oxygenBottlesUsed}
+            You consumed oxygen bottles : <span style={resultStyle}>{this.props.oxygenBottlesUsed}</span>
             <br/>
-            Total Score: {this.props.scoreData.totalScore}
+            Total Score: <span style={resultStyle}>{this.props.scoreData.totalScore}</span>
             <br/>
+            Top Three Scores for {"'"+ this.props.scoreData.wordBeingSought + "'"} : 
+            <ol>
+              <li>ChrisKerr84 - <span style={resultStyle}>80pts</span></li>
+              <li>AlanCrowe81 - <span style={resultStyle}>78pts</span></li>
+              <li>BonnieK13 - <span style={resultStyle}>62pts</span></li>
+            </ol>
+
             Did your answers meet all clues' requirements?
             <table>
               <thead>
@@ -97,16 +111,33 @@ class ResultsModal extends React.Component {
         );
       }
 
-      function FailImage()
+      function FailImage(answerIndex,clueIndex)
       {
+        console.log("aI: " + answerIndex + " cI:" +clueIndex);
+        let isThisRelevant = (answerIndex > clueIndex);
+        if(!isThisRelevant)
+        {
+          return "N/A";
+        }
+        //readme: otherwise it was relevant - a clue they knew about and didn't meet so FAILED
         return(
-          <img src="/images/Skull.jpg" width="25px" height="25px"/>
+
+            <img src="/images/Skull.jpg" width="25px" height="25px"/>
+          
         );
       }
 
     }
   }
 
+  var resultStyle = {
+    color: 'coral',
+    fontFamily: 'Arial',
+    fontSize: 'larger',
+    textAlign: 'left'
+  }
 
-
+  var spinnerStyle = {
+    margin: "0 auto"
+  }
   export default ResultsModal;

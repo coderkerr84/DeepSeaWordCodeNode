@@ -6,7 +6,6 @@
     height: fit-content;
     background-size: cover;
     filter: opacity(0.3);
-    width: 100vw;
  }
 
 table, th, td {
@@ -28,3 +27,4 @@ th, td {
 tr:nth-child(even) {
       background-color: #EEf9f0;
 }
+
