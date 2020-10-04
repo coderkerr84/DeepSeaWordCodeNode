@@ -19,12 +19,29 @@ td {
     text-align: center;
 }
 
+th {
+    text-decoration: underline;
+}
+
 th, td {
     padding: 5px;
     border-bottom: 1px solid #ddd;
+    font-family: cursive;
 }
 
 tr:nth-child(even) {
       background-color: #EEf9f0;
 }
 
+.button{
+    background-color: aquamarine;
+    color:navy;
+    /* width: 120px; */
+    border-radius: 15px 50px;
+    }
+
+.DeadSpan{
+    background-color: antiquewhite;
+    padding: 10px;
+    border-radius: 15px 50px;
+}

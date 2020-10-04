@@ -2,6 +2,7 @@ import ReactModal from 'react-modal';
 import React, {useState, Component} from 'react';
 import Spinner from './Loader';
 import './ResultsModal.css';
+import ReactTooltip from 'react-tooltip';
 
 class ResultsModal extends React.Component {
     constructor () {
@@ -33,6 +34,31 @@ class ResultsModal extends React.Component {
         );
       }
 
+      if(this.props.isDead)
+      {
+        return (
+              <ReactModal 
+              isOpen={this.props.showModal}
+              contentLabel="Minimal Modal Example"
+              appElement={document.getElementById("root")}
+              style={{
+                content: {
+                  color: 'red',
+                   backgroundImage: 'url(/images/Wife.png)',
+                   backgroundSize: 'cover',
+                  //backgroundColor: 'aliceblue',
+                  overflow: 'scroll',
+                  filter: 'drop-shadow(1px 2px 4px darkblue)'
+                }
+              }}
+              >
+              <span className="DeadSpan">Not all treasure hunters return home with loot...
+              <button onClick={this.props.handleReplay} className="button" value="Replay">Dive Again!</button>
+              </span>
+              </ReactModal>
+        );
+      }
+
       const clueScoringRows = []
 
       for (let index = 0; index < 7; index++) {
@@ -60,50 +86,63 @@ class ResultsModal extends React.Component {
              style={{
               content: {
                 color: 'darkblue',
-                // backgroundImage: 'url(/images/treasure.jpg)',
-                // backgroundSize: 'auto'
-                backgroundColor: 'cornsilk',
-                overflow: 'scroll'
+                backgroundColor: 'aliceblue',
+                overflow: 'scroll',
+                filter: 'drop-shadow(1px 2px 4px darkblue)'
               }
             }}
             
           >
-            You were searching for : <span style={resultStyle}>{this.props.scoreData.wordBeingSought}</span>
+            {this.props.scoreData.IsPerfectDive != null && this.props.scoreData.IsPerfectDive == 1 ? PerfectDive() : ""}
+            You {this.props.scoreData.FoundTreasure != null && this.props.scoreData.FoundTreasure == 1 ? "succesfully found " : "were searching for " } : <span style={resultStyle}>{this.props.scoreData.wordBeingSought}</span>
             <br/>
             You consumed oxygen bottles : <span style={resultStyle}>{this.props.oxygenBottlesUsed}</span>
             <br/>
-            Total Score: <span style={resultStyle}>{this.props.scoreData.totalScore}</span>
+            Total Score: <span style={resultStyle}>${this.props.scoreData.totalScore}m</span>
             <br/>
             Top Three Scores for {"'"+ this.props.scoreData.wordBeingSought + "'"} : 
-            <ol>
-              <li>ChrisKerr84 - <span style={resultStyle}>80pts</span></li>
-              <li>AlanCrowe81 - <span style={resultStyle}>78pts</span></li>
-              <li>BonnieK13 - <span style={resultStyle}>62pts</span></li>
-            </ol>
+            {DisplayTopThree(this.props.scoreData.topThreeScores)}
 
-            Did your answers meet all clues' requirements?
+            How you did against all the clues :
+            <span style={smallerFont}>hover over e.g 'Clue2' to be reminded of that clue</span>
             <table>
-              <thead>
-                <th></th>
-                <th>Clue 1</th>
-                <th>Clue 2</th>
-                <th>Clue 3</th>
-                <th>Clue 4</th>
-                <th>Clue 5</th>
-                <th>Clue 6</th>
-                <th>Clue 7</th>
-              </thead>
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th data-tip={"'" + this.props.clues[0].clueText + "'"}>Clue 1</th>
+                    <th data-tip={"'" + this.props.clues[1].clueText + "'"}>Clue 2</th>
+                    <th data-tip={"'" + this.props.clues[2].clueText + "'"}>Clue 3</th>
+                    <th data-tip={"'" + this.props.clues[3].clueText + "'"}>Clue 4</th>
+                    <th data-tip={"'" + this.props.clues[4].clueText + "'"}>Clue 5</th>
+                    <th data-tip={"'" + this.props.clues[5].clueText + "'"}>Clue 6</th>
+                    <th data-tip={"'" + this.props.clues[6].clueText + "'"}>Clue 7</th>
+                  </tr>
+                </thead>
               <tbody>
                 {clueScoringRows}
               </tbody>
             </table>
             <br/>
 
-            <button onClick={this.props.handleReplay} value="Replay">Dive Again!</button>
+            <button onClick={this.props.handleReplay} className="button" value="Replay">Dive Again!</button>
+            <ReactTooltip />
           </ReactModal>
         </div>
       );
 
+      function PerfectDive()
+      {
+        return(
+          <div style={biggerFont}>
+            <span style={blue}>Congratulations</span>
+            <span style={green}>It's</span>
+            <span style={orange}>A</span>
+            <span style={violet}>Perfect</span>
+            <span style={red}>Dive!</span>  
+          </div>            
+        ); 
+
+      }
       function SuccessImage()
       {
         return(
@@ -114,9 +153,10 @@ class ResultsModal extends React.Component {
       function FailImage(answerIndex,clueIndex)
       {
         console.log("aI: " + answerIndex + " cI:" +clueIndex);
-        let isThisRelevant = (answerIndex > clueIndex);
+        let isThisRelevant = (parseInt(clueIndex) <= parseInt(answerIndex));
         if(!isThisRelevant)
         {
+          console.log("display N/A for aI: " + answerIndex + " cI:" +clueIndex);
           return "N/A";
         }
         //readme: otherwise it was relevant - a clue they knew about and didn't meet so FAILED
@@ -127,8 +167,28 @@ class ResultsModal extends React.Component {
         );
       }
 
+      function DisplayTopThree(topThree)
+      {
+        console.log("DisplayTopThree: " + topThree[0].playerName);
+        return(
+          <ol>
+          <li>{topThree[0] != null && topThree[0] != undefined ? topThree[0].playerName : "...no-one yet!"} - <span style={resultStyle}>{topThree[0] != null && topThree[0] != undefined ? "$" + topThree[0].totalPoints + "m" : "...no-one yet!"}</span></li>
+          <li>{topThree[1] != null && topThree[1] != undefined ? topThree[1].playerName : "...no-one yet!"} - <span style={resultStyle}>{topThree[1] != null && topThree[1] != undefined  ? "$" + topThree[1].totalPoints + "m" : "...no-one yet!"}</span></li>
+          <li>{topThree[2] != null && topThree[2] != undefined ? topThree[2].playerName : "...no-one yet!"}- <span style={resultStyle}>{topThree[2] != null && topThree[2] != undefined ? "$" + topThree[2].totalPoints + "m" : "...no-one yet!"}</span></li>
+          </ol>
+        );
+      }
+
     }
   }
+
+var smallerFont = {
+  fontSize: 'smaller'
+}
+
+var biggerFont = {
+  fontSize: 'larger'
+}
 
   var resultStyle = {
     color: 'coral',
@@ -137,7 +197,24 @@ class ResultsModal extends React.Component {
     textAlign: 'left'
   }
 
+  var red = {
+    color: 'red'
+  }
+  var violet = {
+    color: 'violet'
+  }
+  var green = {
+    color: 'green'
+  }
+  var orange = {
+    color: 'orange'
+  }
+  var blue = {
+    color: 'blue'
+  }
+
   var spinnerStyle = {
     margin: "0 auto"
   }
+
   export default ResultsModal;

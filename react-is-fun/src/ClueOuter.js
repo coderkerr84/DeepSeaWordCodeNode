@@ -49,14 +49,15 @@ class ClueOuter extends React.Component
                     initializeTimers={this.props.initializeTimers} 
                     style={this.props.roundTheyWereOnWhenTimerExpired == clue.roundId ? displayNone : floatLeft} 
                     uniqueKey={clue.roundId}
-                    haltTimer={clue.roundId < this.props.currentRoundBeingPlayed}
+                    haltTimer={clue.roundId < this.props.currentRoundBeingPlayed || this.props.resurfaceClicked}
                     oxygenBottlesUsed={this.props.oxygenBottlesUsed}
                     currentRoundBeingPlayed={this.props.currentRoundBeingPlayed}
                     timerRanOut={this.props.timerRanOut}
                     /> 
-                <div style={floatLeft} className={diverClassName}>
-                    <span style={{...diverSpanStyle,...{display:diverDisplay}}}>{clue.roundId == 1 ? "Click Diver To Start" : ""}</span>
-                    <img src="images/diver2.png" height="80px" style={{...isDiverDead ? diverStyleDead : diverStyleAlive,...{display:diverDisplay}}} onClick={(event) => this.props.onDiverClick(clue.roundId)}>
+                <div style={{...floatLeft,...{position:"relative"}}} className={diverClassName}>
+                    <span style={{...diverSpanStyle,...{display:diverDisplay}}}>{clue.roundId == 1 && !isDiverDead ? "Click Diver To Start" : ""}</span>
+                    <span style={{...diverSpanStyle,...{display:diverDisplay}}}>{isDiverDead ? "Dead! Submit and Dive to recover body" : ""}</span>
+                    <img src="images/diver2.png" height="80px" style={{...isDiverDead ? diverStyleDead : diverStyleAlive,...{display:diverDisplay,paddingBottom:"20px"}}} onClick={(event) => this.props.onDiverClick(clue.roundId)}>
                     </img>                    
                 </div>
                 <div style={floatRight}>
@@ -66,7 +67,7 @@ class ClueOuter extends React.Component
                         </button>
                     </div>
                     <div style={buttonPadding}>
-                        <button disabled={!isThisTheCurrentRound}  className="button" style={{backgroundColor:"antiquewhite"}} onClick={function() { alert('Resurface'); }}>
+                        <button disabled={!isThisTheCurrentRound}  className="button" style={{backgroundColor:"antiquewhite"}} onClick={(event) =>  this.props.onClickResurface(clue.roundId)}>
                                 Resurface
                         </button>
                     </div>
@@ -122,7 +123,7 @@ var diverSpanStyle={
     position: 'absolute',
     left: '0',
     right: '0',
-    bottom: '4%'
+    bottom: '1%'
 }
 var style = {
     fontFamily: 'Arial',

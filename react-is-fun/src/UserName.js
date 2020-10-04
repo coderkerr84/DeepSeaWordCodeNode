@@ -8,10 +8,9 @@ render()
 {
     return (       
         <div className='UserName'>
-            <label  style={style}>I, the willing diver, </label>
-            <input type='text' tabIndex={"0"} onBlur={(event) => this.props.changeUserName(event.target.value)} placeholder=" ... your name ... "/>
-            
-            <label  style={style}>accept the risk in exploring the deep ocean.</label>
+            <label  style={style}>I hereby declare that I, </label>
+            <input maxLength="20" type='text' tabIndex={"0"} onBlur={(event) => this.props.changeUserName(event.target.value)} placeholder=" ... your name ... "/>
+            <label  style={style}>accept the risk in exploring the Deep Sea.</label>
             <br/>
             <br/>
             <a href="#" style={{color:"aliceblue"}} >Then click anywhere to advance.</a>
