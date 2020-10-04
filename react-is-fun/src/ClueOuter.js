@@ -56,7 +56,7 @@ class ClueOuter extends React.Component
                     /> 
                 <div style={{...floatLeft,...{position:"relative"}}} className={diverClassName}>
                     <span style={{...diverSpanStyle,...{display:diverDisplay}}}>{clue.roundId == 1 && !isDiverDead ? "Click Diver To Start" : ""}</span>
-                    <span style={{...diverSpanStyle,...{display:diverDisplay}}}>{isDiverDead ? "Dead! Submit and Dive to recover body" : ""}</span>
+                    <span style={{...diverSpanStyle,...{display:diverDisplay, color: "red"}}}>{isDiverDead ? "Submit and Dive to recover body" : ""}</span>
                     <img src="images/diver2.png" height="80px" style={{...isDiverDead ? diverStyleDead : diverStyleAlive,...{display:diverDisplay,paddingBottom:"20px"}}} onClick={(event) => this.props.onDiverClick(clue.roundId)}>
                     </img>                    
                 </div>

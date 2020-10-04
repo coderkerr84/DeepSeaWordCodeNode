@@ -310,7 +310,7 @@ var instructionsStyle = {
     color: 'white',
     // readme: hehe 'Arial', get it?
     fontFamily: 'Arial',
-    fontSize: '14px',
+    fontSize: '13px',
     // margin: '20px 200px 40px 200px',
     padding: '20px',
 

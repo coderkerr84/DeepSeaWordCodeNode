@@ -46,6 +46,7 @@ class ResultsModal extends React.Component {
                   color: 'red',
                    backgroundImage: 'url(/images/Wife.png)',
                    backgroundSize: 'cover',
+                   backgroundPosition: 'center',
                   //backgroundColor: 'aliceblue',
                   overflow: 'scroll',
                   filter: 'drop-shadow(1px 2px 4px darkblue)'
@@ -134,11 +135,11 @@ class ResultsModal extends React.Component {
       {
         return(
           <div style={biggerFont}>
-            <span style={blue}>Congratulations</span>
-            <span style={green}>It's</span>
-            <span style={orange}>A</span>
-            <span style={violet}>Perfect</span>
-            <span style={red}>Dive!</span>  
+            <span style={blue}>Congratulations </span>
+            <span style={green}>It's </span>
+            <span style={orange}>A </span>
+            <span style={violet}>PERFECT</span>
+            <span style={red}>Dive! </span>  
           </div>            
         ); 
 
@@ -172,9 +173,9 @@ class ResultsModal extends React.Component {
         console.log("DisplayTopThree: " + topThree[0].playerName);
         return(
           <ol>
-          <li>{topThree[0] != null && topThree[0] != undefined ? topThree[0].playerName : "...no-one yet!"} - <span style={resultStyle}>{topThree[0] != null && topThree[0] != undefined ? "$" + topThree[0].totalPoints + "m" : "...no-one yet!"}</span></li>
-          <li>{topThree[1] != null && topThree[1] != undefined ? topThree[1].playerName : "...no-one yet!"} - <span style={resultStyle}>{topThree[1] != null && topThree[1] != undefined  ? "$" + topThree[1].totalPoints + "m" : "...no-one yet!"}</span></li>
-          <li>{topThree[2] != null && topThree[2] != undefined ? topThree[2].playerName : "...no-one yet!"}- <span style={resultStyle}>{topThree[2] != null && topThree[2] != undefined ? "$" + topThree[2].totalPoints + "m" : "...no-one yet!"}</span></li>
+          <li>{topThree[0] != null && topThree[0] != undefined ? topThree[0].playerName : "...no-one yet!"}<span style={resultStyle}>{topThree[0] != null && topThree[0] != undefined ? "- $" + topThree[0].totalPoints + "m" : ""}</span></li>
+          <li>{topThree[1] != null && topThree[1] != undefined ? topThree[1].playerName : "...no-one yet!"}<span style={resultStyle}>{topThree[1] != null && topThree[1] != undefined  ? "- $" + topThree[1].totalPoints + "m" : ""}</span></li>
+          <li>{topThree[2] != null && topThree[2] != undefined ? topThree[2].playerName : "...no-one yet!"}<span style={resultStyle}>{topThree[2] != null && topThree[2] != undefined ? "- $" + topThree[2].totalPoints + "m" : ""}</span></li>
           </ol>
         );
       }
