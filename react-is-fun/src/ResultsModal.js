@@ -93,8 +93,8 @@ class ResultsModal extends React.Component {
             }}
             
           >
-            {this.props.scoreData.IsPerfectDive != null && this.props.scoreData.IsPerfectDive == 1 ? PerfectDive() : ""}
-            You {this.props.scoreData.FoundTreasure != null && this.props.scoreData.FoundTreasure == 1 ? "succesfully found " : "were searching for " } : <span style={resultStyle}>{this.props.scoreData.wordBeingSought}</span>
+            {this.props.scoreData.isPerfectDive != null && this.props.scoreData.isPerfectDive == 1 ? PerfectDive() : ""}
+            You {this.props.scoreData.foundTreasure != null && this.props.scoreData.foundTreasure == 1 ? "succesfully found " : "were searching for " } : <span style={resultStyle}>{this.props.scoreData.wordBeingSought}</span>
             <br/>
             You consumed oxygen bottles : <span style={resultStyle}>{this.props.oxygenBottlesUsed}</span>
             <br/>
