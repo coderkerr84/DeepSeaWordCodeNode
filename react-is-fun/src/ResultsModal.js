@@ -95,6 +95,7 @@ class ResultsModal extends React.Component {
             
           >
             {this.props.scoreData.isPerfectDive != null && this.props.scoreData.isPerfectDive == 1 ? PerfectDive() : ""}
+            <br/>  
             You {this.props.scoreData.foundTreasure != null && this.props.scoreData.foundTreasure == 1 ? "succesfully found " : "were searching for " } : <span style={resultStyle}>{this.props.scoreData.wordBeingSought}</span>
             <br/>
             You consumed oxygen bottles : <span style={resultStyle}>{this.props.oxygenBottlesUsed}</span>
@@ -105,7 +106,8 @@ class ResultsModal extends React.Component {
             {DisplayTopThree(this.props.scoreData.topThreeScores)}
 
             How you did against all the clues :
-            <span style={smallerFont}>hover over e.g 'Clue2' to be reminded of that clue</span>
+            <br/>
+            <span style={smallerFont}> (hover over e.g 'Clue 2' to be reminded of that clue)</span>
             <table>
                 <thead>
                   <tr>
@@ -138,8 +140,8 @@ class ResultsModal extends React.Component {
             <span style={blue}>Congratulations </span>
             <span style={green}>It's </span>
             <span style={orange}>A </span>
-            <span style={violet}>PERFECT</span>
-            <span style={red}>Dive! </span>  
+            <span style={violet}>*PERFECT* </span>
+            <span style={red}>Dive! </span>
           </div>            
         ); 
 
