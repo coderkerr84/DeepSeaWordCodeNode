@@ -100,13 +100,13 @@ class GameBoard extends React.Component
               formData.append('GUID', this.state.clues.guid);
               formData.append('userName', this.state.userName);
               //readme: replace 14 lines these with LOOPS!
-              formData.append('userGuesses[0]', this.state.userGuesses[0]);
-              formData.append('userGuesses[1]', this.state.userGuesses[1]);
-              formData.append('userGuesses[2]', this.state.userGuesses[2]);
-              formData.append('userGuesses[3]', this.state.userGuesses[3]);
-              formData.append('userGuesses[4]', this.state.userGuesses[4]);
-              formData.append('userGuesses[5]', this.state.userGuesses[5]);
-              formData.append('userGuesses[6]', this.state.userGuesses[6]);
+              formData.append('userGuesses[0]', (this.state.userGuesses[0] != null ? this.state.userGuesses[0] : 'realnull' ));
+              formData.append('userGuesses[1]', (this.state.userGuesses[1] != null ? this.state.userGuesses[1] : 'realnull' ));
+              formData.append('userGuesses[2]', (this.state.userGuesses[2] != null ? this.state.userGuesses[2] : 'realnull' ));
+              formData.append('userGuesses[3]', (this.state.userGuesses[3] != null ? this.state.userGuesses[3] : 'realnull' ));
+              formData.append('userGuesses[4]', (this.state.userGuesses[4] != null ? this.state.userGuesses[4] : 'realnull' ));
+              formData.append('userGuesses[5]', (this.state.userGuesses[5] != null ? this.state.userGuesses[5] : 'realnull' ));
+              formData.append('userGuesses[6]', (this.state.userGuesses[6] != null ? this.state.userGuesses[6] : 'realnull' ));
               formData.append('clueInfo[0]', clueInfo[0]);
               formData.append('clueInfo[1]', clueInfo[1]);
               formData.append('clueInfo[2]', clueInfo[2]);
@@ -208,8 +208,8 @@ class GameBoard extends React.Component
         resurfaceClicked: false
         //userName: ""
       });
-        
-      fetch('http://' + this.addressOfService + '/Entries/GetWordWithClues')
+      
+      fetch('http://' + this.addressOfService + '/Entries/GetWordWithClues?userName=' + this.state.userName)
           .then(res => res.json())
           .then((data) => {
             this.setState({ clues: data, isLoadingPage: false })
