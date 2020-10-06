@@ -8,7 +8,7 @@ import ResultsModal from './ResultsModal';
 
 class GameBoard extends React.Component
 {
-    addressOfService = "deepseaword.com"; //localhost:5000
+    addressOfService = "localhost:5000"; //localhost:5000
     // const [currentRoundBeingPlayed, setCount] = useState(1);
     constructor(props) {
         super(props);
