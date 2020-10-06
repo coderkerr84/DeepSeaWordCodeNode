@@ -6,6 +6,16 @@ class UserName extends React.Component
     //const [count, setCount] = useState(0);
 render()
 {
+
+    if(this.props.userName != null && this.props.userName != "")
+    {
+        return (
+            <div className='UserName'>
+                <label style={style}>Catch a quick breath <span style={userStyle}>{this.props.userName}</span> and then we'll go again!</label>
+            </div>  
+        );
+    }
+
     return (       
         <div className='UserName'>
             <label  style={style}>I hereby declare that I, </label>
@@ -23,5 +33,9 @@ var style = {
     margin: '5px 5px 0px 5px',
     padding: '5px',
     fontSize: "larger"
+  }
+  var userStyle = {
+    color: "yellow",
+    fontSize: "largest"
   }
 export default UserName;

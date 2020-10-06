@@ -8,7 +8,7 @@ import ResultsModal from './ResultsModal';
 
 class GameBoard extends React.Component
 {
-    addressOfService = "localhost:5000"; //localhost:5000
+    addressOfService = "deepseaword.com"; //localhost:5000
     // const [currentRoundBeingPlayed, setCount] = useState(1);
     constructor(props) {
         super(props);
@@ -240,7 +240,7 @@ class GameBoard extends React.Component
                     High scores require: speed, valid words, limited oxygen refills 
                     and finding that treasure!  
                   
-                    {this.state.isLoadingPage || this.state.userName == "" ? <div><Spinner/><UserName changeUserName={this.handleEnterUserName}/></div>  : this.renderClues(parsedClues)}
+                    {this.state.isLoadingPage || this.state.userName == "" ? <div><Spinner/><UserName userName={this.state.userName} changeUserName={this.handleEnterUserName}/></div>  : this.renderClues(parsedClues)}
                     {this.renderScore()}
                 </div>
    
@@ -343,7 +343,7 @@ var style = {
 var titleStyle = {
     //backgroundColor: 'lightblue',
     color: 'yellow',
-    fontFamily: 'Phosphate,Futura,Rockwell',
+    fontFamily: 'Phosphate,Futura,Rockwell,Impact',
     fontSize: '45px',
     textAlign: 'Center',
     top: '0px'

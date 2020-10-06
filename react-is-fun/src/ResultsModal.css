@@ -41,9 +41,10 @@ tr:nth-child(even) {
     }
 
 .DeadSpan{
-    background-color: antiquewhite;
-    padding: 10px;
+    background-color: floralwhite;
+    padding: 18px;
     border-radius: 15px 50px;
     display: inline-block;
     border-bottom: solid;
+    opacity: 0.88;
 }
