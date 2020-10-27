@@ -11,7 +11,7 @@ render()
     {
         return (
             <div className='UserName'>
-                <label style={style}>Catch a quick breath <span style={userStyle}>{this.props.userName}</span> and then we'll go again!</label>
+                <label style={style}>Catch your breath <span style={userStyle}>{this.props.userName}</span> and then we'll go again!</label>
             </div>  
         );
     }
@@ -19,8 +19,8 @@ render()
     return (       
         <div className='UserName'>
             <label  style={style}>I hereby declare that I, </label>
-            <input maxLength="20" type='text' tabIndex={"0"} onBlur={(event) => this.props.changeUserName(event.target.value)} placeholder=" ... your name ... "/>
-            <label  style={style}>accept the risk in exploring the Deep Sea.</label>
+            <input maxLength="20" type='text' tabIndex={"0"} onKeyUp={(event) => this.props.changeUserName(event.target.value, event.key)} onBlur={(event) => this.props.changeUserName(event.target.value, "Enter")} placeholder=" ... your name ... "/>
+            <label  style={style}>accept the risks in exploring the Deep Sea.</label>
             <br/>
             <br/>
             <a href="#" style={{color:"aliceblue"}} >Then click anywhere to advance.</a>

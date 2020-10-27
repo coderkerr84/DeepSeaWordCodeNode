@@ -48,3 +48,9 @@ tr:nth-child(even) {
     border-bottom: solid;
     opacity: 0.88;
 }
+.fontBigger{
+    font-size: larger;
+}
+.fontSmaller{
+    font-size: smaller;
+}

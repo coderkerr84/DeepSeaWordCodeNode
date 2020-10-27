@@ -1,8 +1,19 @@
 .button{
-background-color: aquamarine;
-color:navy;
-/* width: 120px; */
-border-radius: 15px 50px;
+    background-color: aquamarine;
+    color:navy;
+    /* width: 120px; */
+    border-radius: 15px 50px;
+}
+.button:disabled{
+    background-color: lightgray;
+    color:navy;
+    /* width: 120px; */
+    border-radius: 15px 50px;
+}
+
+.clueSquid {
+    background-color: black;
+    color: black;
 }
 
 .clueOuter {
@@ -10,7 +21,14 @@ border-radius: 15px 50px;
     color: black;
     font-family: 'Arial';
     left: 30px;
-    margin:10px;
+    margin: auto;
+    margin-top: 15px;
+    max-width: 700px;
+  }
+  @media (max-width: 500px) {
+    .clueOuter {
+        max-width: none;
+    }
   }
 
 .clueOuterInPlay {
@@ -21,10 +39,52 @@ border-radius: 15px 50px;
     filter: opacity(0.025)
 }
 
+.foundTreasure{
+    background-image: url("/images/treasure.jpg");
+    background-size: contain;
+    background-repeat: no-repeat; 
+    background-color: white;
+}
+
+.sharkEncounter{
+    background-image: url("/images/shark2.jpg");
+    background-size: contain;
+    /*background-position: center;*/
+    /* height: 100px; */
+    background-repeat: no-repeat; 
+    background-color: white;
+}
+
+.mineEncounter{
+    background-image: url("/images/seamine.jpg");
+    background-size: contain;
+    /*background-position: center;*/
+    /* height: 100px; */
+    background-repeat: no-repeat; 
+    background-color: #F6F6F6;
+}
+
+.squidEncounter{
+    background-image: url("/images/squid_orange.jpg");
+    background-size: contain;
+    /*background-position: center;*/
+    /* height: 100px; */
+    background-repeat: no-repeat; 
+    background-color: #FFF;
+}
+
+
 .hideBlock {
     display: none;
 }
 
-.showBlock {
+.alert-Primary {
     display: block;
+    color: #000;/*#004085;*/
+    background-color: #A4DADD;/*#cce5ff;*/
+    border-color: #b8daff;
+    margin:15px;
+    padding:15px;
+    opacity: 0.75;
 }
+

@@ -1,21 +1,59 @@
-import React, {useState, Component} from 'react';
+import React from 'react';
 import {render} from 'react-dom';
 import './GameBoard.css';
 import ClueOuter from './ClueOuter';
 import Spinner from './Loader';
 import UserName from './UserName';
 import ResultsModal from './ResultsModal';
+import okaySfx from './sounds/okay.mp3'; 
+import waterSfx from './sounds/water.mp3'; 
+import treasureSfx from './sounds/treasure.mp3'; 
+import gaspSfx from './sounds/gasp.mp3'; 
+import rejectedSfx from './sounds/rejected.mp3';
+import bombSfx from './sounds/bomb.mp3';
+import sharkSfx from './sounds/jaws.mp3';
+import squirtSfx from './sounds/squirt.mp3'; 
+import UIfx from 'uifx';
+
+const okaySound = new UIfx(okaySfx);
+okaySound.setVolume(0.4);
+const waterSound = new UIfx(waterSfx);
+waterSound.setVolume(0.6);
+const treasureSound = new UIfx(treasureSfx);
+treasureSound.setVolume(1.0);
+const gaspSound = new UIfx(gaspSfx);
+gaspSound.setVolume(0.5);
+const rejectedSound = new UIfx(rejectedSfx);
+rejectedSound.setVolume(0.7);
+const bombSound = new UIfx(bombSfx);
+bombSound.setVolume(0.9);
+const sharkSound = new UIfx(sharkSfx);
+sharkSound.setVolume(0.3);
+const squirtSound = new UIfx(squirtSfx);
+squirtSound.setVolume(0.7);
+
+function getRandomInt(min, max) {
+  var num = Math.floor(Math.random() * Math.floor(max));
+  console.log("getRandomInt: " + min + " and " + max);
+  console.log("num :" + num);
+  if(num >= min && num <= max)
+  {
+    return num;
+  }
+  return 0;
+}
 
 class GameBoard extends React.Component
 {
-    addressOfService = "localhost:5000"; //localhost:5000
+    addressOfService = "deepseaword.com"; // localhost:5000 | deepseaword.com
     // const [currentRoundBeingPlayed, setCount] = useState(1);
     constructor(props) {
         super(props);
         this.state = {
           userGuesses: Array(7).fill(null),
           currentRound: 1,
-          oxygenBottlesUsed: 0,
+          oxygenBottlesBought: 0,
+          oxygenBottlesApplied: 0,
           initializeTimers: Array(7).fill(null),
           clues: null,
           roundTheyWereOnWhenTimerExpired: null,
@@ -26,7 +64,14 @@ class GameBoard extends React.Component
           dictionaryCheckInProgress: false,
           scoreData: null,
           scoreLoading: false,
-          resurfaceClicked: false
+          resurfaceClicked: false,
+          highScoreData: null,
+          foundTreasureInRound: null,
+          sharkAppearsInRound: getRandomInt(1,4),
+          squidAppearsInRound: getRandomInt(5,7),
+          mineAppearsInRound: getRandomInt(6,8),
+          gameStarted: 0,
+          isDemoMode: 0
         };
       }
 
@@ -35,35 +80,61 @@ class GameBoard extends React.Component
       wordLookupFeedbackMessagesCopy[thisRoundNumber-1] = message;
       this.setState({wordLookupFeedbackMessages : wordLookupFeedbackMessagesCopy})
      }
- 
+    
+     // readme: very important function!
      checkWord(thisRoundNumber,userGuess){
-      console.log(thisRoundNumber + " checkWord : " +userGuess )
+      //console.log(thisRoundNumber + " checkWord : " +userGuess )
       this.updateWordFeedback(thisRoundNumber,'Checking dictionary...');
+      userGuess = userGuess.trim().toUpperCase();
 
       if(userGuess == "" || userGuess == null)
       {
         this.updateWordFeedback(thisRoundNumber,'Enter word then Submit and Dive');
+        rejectedSound.play();
         return false;
       }
+
+      // readme : they have already used this word on prev round
+      // and the +1 because the array is indexed at 0.
+      if(this.state.userGuesses.indexOf(userGuess) > -1 && parseInt(this.state.userGuesses.indexOf(userGuess) + 1) < thisRoundNumber)
+      {
+        this.updateWordFeedback(thisRoundNumber,'Can\'t use that word again!');
+        rejectedSound.play();
+        return false;
+      }
+
       if(this.state.dictionaryCheckInProgress)
       {
         this.updateWordFeedback(thisRoundNumber,'Double-clickers will be left behind!');
+        rejectedSound.play();
         return false;
       }
 
       this.setState({dictionaryCheckInProgress: true}); 
-      
       //https://deepseaworddotnetservice.azurewebsites.net/Entries
-      fetch('http://' + this.addressOfService + '/Entries/LookupWord?word=' + userGuess)
+      fetch('http://' + this.addressOfService + '/Entries/LookupWord?word=' + userGuess + '&playerName=' + this.state.userName)
         .then(res => res.json())
         .then((data) => {
           //this.setState({ clues: data })
           if(data != null)
           {
-            //console.log('word def:' + data.definition);
+            console.log('word def:' + data.definition);
             // readme: word was a real word.
             this.updateWordFeedback(thisRoundNumber,'Found in dictionary.');
+            //console.log(userGuess.trim().toUpperCase() + " ? " + this.state.clues.temporaryWord.trim().toUpperCase());
+            if(userGuess.trim().toUpperCase() == this.state.clues.temporaryWord.trim().toUpperCase())
+            {
+              treasureSound.play();
+              this.setState({foundTreasureInRound:thisRoundNumber })
+              this.updateWordFeedback(thisRoundNumber,'Great! Keep going - valid words earn $$');
+            }
+            else
+            {
+              okaySound.play();
+              //this.handleSoundOkay();
+            }
             this.setState({currentRound: thisRoundNumber+1});
+
             if(thisRoundNumber < 7)
             {
               this.handleDiverClick(thisRoundNumber+1);
@@ -78,13 +149,23 @@ class GameBoard extends React.Component
           }
           else
           {
-            this.updateWordFeedback(thisRoundNumber,'NOT found - try another!');
+            if(this.state.mineAppearsInRound == thisRoundNumber){
+              bombSound.play();
+              this.updateWordFeedback(thisRoundNumber,'NOT found - mine exploded!');
+              this.setState({roundTheyWereOnWhenTimerExpired: thisRoundNumber}); 
+            }
+            else{
+              this.updateWordFeedback(thisRoundNumber,'NOT found - try another!');
+              rejectedSound.play();
+            }     
           }
+
           this.setState({dictionaryCheckInProgress: false}); 
 
       })
-      .catch( ()=>
+      .catch( (error)=>
       {
+        console.log(error);
         this.updateWordFeedback(thisRoundNumber,'Apparatus failure. Try again')
       });
     }
@@ -114,7 +195,7 @@ class GameBoard extends React.Component
               formData.append('clueInfo[4]', clueInfo[4]);
               formData.append('clueInfo[5]', clueInfo[5]);
               formData.append('clueInfo[6]', clueInfo[6]);
-              formData.append('oxygenUsed', this.state.oxygenBottlesUsed);
+              formData.append('oxygenUsed', this.state.oxygenBottlesBought);
               formData.append('isDead', this.state.roundTheyWereOnWhenTimerExpired != null)
 
               //http://deepseaworddotnetservice.azurewebsites.net
@@ -132,8 +213,15 @@ class GameBoard extends React.Component
     }
 
     handleReplay = () => {
-      this.componentDidMount()
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+      this.componentDidMount();
+      this.fetchNewWord();
       //this.render();
+    }
+
+    handleSoundOkay = () => {
+      okaySound.play()
     }
 
     handleResurfaceClick = (thisRoundNumber) =>{
@@ -144,7 +232,7 @@ class GameBoard extends React.Component
 
     handleSubmitAndDiveClick = (thisRoundNumber) => {
       //readme: checking the word is good before advancing
-
+        console.log(this.state.mineAppearsInRound);
         if(this.state.initializeTimers[0] == null)
         {
           alert("Please click the diver image to start the timer \n  ");
@@ -160,29 +248,101 @@ class GameBoard extends React.Component
         }
     };
 
+      // readme: is really a "move to next round" function - believed to only be possible to trigger once per round
+      // so doesn't have any protection to prevent multiple calls to it.
       handleDiverClick = (thisRoundNumber) =>{
+        this.progressToNextRound(thisRoundNumber);
+      }
+
+      // readme: basically init the first timer, triggered by OnFocus on first word, so might (accidentally) be triggered many times
+      // hence need for "gameStarted" to ensure only first time does something.
+      startTimer = (thisRoundNumber) =>{
+        if(thisRoundNumber===1 && this.state.gameStarted == 0) {
+          this.progressToNextRound(thisRoundNumber);
+        }
+      }
+
+      progressToNextRound(thisRoundNumber){
+        //console.log("url :" + window.location.search);
+        this.setState({gameStarted : 1})
+        if(thisRoundNumber===1) waterSound.play();
+        //console.log("thisROundNum : " + thisRoundNumber + " sk : " + this.state.sharkAppearsInRound);
+        if(thisRoundNumber === this.state.sharkAppearsInRound) sharkSound.play();
+        if(thisRoundNumber === this.state.squidAppearsInRound) squirtSound.play();
           //alert('Clicked on diver' + thisRoundNumber);
           const initializeTimersCopy = this.state.initializeTimers.slice();
           // readme: timer has been initialized
           initializeTimersCopy[thisRoundNumber-1] = 1;
           this.setState({initializeTimers : initializeTimersCopy})
+          
       }
 
       handleOxygenClick = (thisRoundNumber) => {
+        gaspSound.play();
         //readme: not sure if I'll want to count which round the oxygen was used in, might leave param there til i decide
-        let oxygenBottlesUsedNew = this.state.oxygenBottlesUsed + 1;
-        this.setState({oxygenBottlesUsed: oxygenBottlesUsedNew});
+        let oxygenBottlesBoughtNew = this.state.oxygenBottlesBought + 1;
+        this.setState({oxygenBottlesBought: oxygenBottlesBoughtNew});
       };
       
-    //   readme: this is an example of 2 pieces of info being returned to the parent from a child so we can update the state
-      handleChangeUserGuess = (userGuess,i) => {
+    //readme: this is an example of 2 pieces of info being returned to the parent from a child so we can update the state
+      handleChangeUserGuess = (userGuess,i, key) => {
+        console.log("key was :" + key);
+
         const userGuessesCopy = this.state.userGuesses.slice();
-        userGuessesCopy[i-1] = userGuess;
+        userGuessesCopy[i-1] = userGuess.trim().toUpperCase();
         this.setState({userGuesses: userGuessesCopy});
+          
+        if(key == "Enter")
+        {
+          // readme: they pressed enter, assume they want to trigger a SubmitAndDive
+          this.handleSubmitAndDiveClick(i);
+        }
      }
 
-     handleEnterUserName = (theirUserName) => {
-       this.setState({userName: theirUserName});
+     handleEnterUserName = (theirUserName, key) => {
+       //console.log("key was :" + key);
+       if(key == "Enter" && theirUserName.trim().length > 0)
+       {
+        this.setState({userName: theirUserName});
+        this.fetchNewWord(theirUserName.trim());
+       }
+     }
+
+      fetchNewWord(theirUserName){
+        var userName = this.state.userName;
+        if(userName.length == 0) userName = theirUserName;
+
+        fetch('http://' + this.addressOfService + '/Entries/GetWordWithClues?userName=' + userName)
+        .then(res => res.json())
+        .then((data) => {
+          this.setState({ clues: data, isLoadingPage: false })
+          if(data.isFirstTime)
+          {
+            this.setupDemoMode();
+          }
+        })
+        .catch(console.log)
+     }
+
+     setupDemoMode() {
+           // readme: first time playing? send them on demo mode.
+            // can also put ths shark, jellyfish and bomb to def show .
+            this.setState({sharkAppearsInRound: 3, mineAppearsInRound:7, squidAppearsInRound:6, isDemoMode:1});
+     }
+
+     handleHighScoreDisplay = () =>{
+      this.setState({showModal: true});
+
+          fetch('http://' + this.addressOfService + '/Entries/GetHighScores')
+          .then(res => res.json())
+          .then((data) => {
+            this.setState({ highScoreData: data})
+        })
+        .catch(console.log)
+     }
+
+     handleHighScoreHide = () =>{
+      this.setState({showModal: false, highScoreMode: 0});
      }
 
      handleTimerRanOut = (i) => {
@@ -195,7 +355,8 @@ class GameBoard extends React.Component
       this.setState({
         userGuesses: Array(7).fill(null),
         currentRound: 1,
-        oxygenBottlesUsed: 0,
+        oxygenBottlesBought: 0,
+        oxygenBottlesApplied: 0,
         initializeTimers: Array(7).fill(null),
         clues: null,
         roundTheyWereOnWhenTimerExpired: null,
@@ -205,24 +366,24 @@ class GameBoard extends React.Component
         dictionaryCheckInProgress: false,
         scoreData: null,
         scoreLoading: false,
-        resurfaceClicked: false
+        resurfaceClicked: false,
+        highScoreData: null,
+        foundTreasureInRound : null,
+        sharkAppearsInRound: getRandomInt(1,4),
+        squidAppearsInRound: getRandomInt(5,7),
+        mineAppearsInRound: getRandomInt(6,8),
+        gameStarted: 0,
+        isDemoMode: 0
         //userName: ""
       });
-      
-      fetch('http://' + this.addressOfService + '/Entries/GetWordWithClues?userName=' + this.state.userName)
-          .then(res => res.json())
-          .then((data) => {
-            this.setState({ clues: data, isLoadingPage: false })
-        })
-        .catch(console.log)
-      }
+    }
+
 
       render()
       {
         // let clues = GetJson();
         // let parsedClues = JSON.parse(clues);
         let parsedClues = this.state.clues; 
-
         // console.log(parsedClues);
         // console.log(" and ")
         // console.log(parsedClues2);
@@ -232,14 +393,12 @@ class GameBoard extends React.Component
                     DeepSeaWord                  
                 </div>
                 <div style={creditStyle}>
-                    by Chris Kerr                     
+                    by Chris Kerr               
                 </div>
                 <div className='GameBoard' style={instructionsStyle}>
-                    In every round submit a word that meets that clue and all previous clues. <br/> 
-                    Dont run out of oxygen! If the timer expires so do you! <br/> 
-                    High scores require: speed, valid words, limited oxygen refills 
-                    and finding that treasure!  
-                  
+                    <a href="#" style={{color:"gold", fontWeight: "bold", textAlign:"left", paddingRight:"15px"}} onClick={this.handleHighScoreDisplay} >High Scores</a>
+                    &nbsp;
+                    <a href="#" style={{color:"coral", fontWeight: "bold", textAlign:"right", paddingLeft:"15px"}} onClick={this.handleHighScoreDisplay} >Dive School</a>
                     {this.state.isLoadingPage || this.state.userName == "" ? <div><Spinner/><UserName userName={this.state.userName} changeUserName={this.handleEnterUserName}/></div>  : this.renderClues(parsedClues)}
                     {this.renderScore()}
                 </div>
@@ -252,13 +411,17 @@ class GameBoard extends React.Component
           console.log("renderScore(scoreData)");
           
           if (this.state.clues == null)
-          {
-            return null;
+          {            
+            return(
+                
+              <ResultsModal highScoreData={this.state.highScoreData} isDead={this.state.roundTheyWereOnWhenTimerExpired != null} scoreData={this.state.scoreData} userGuesses={this.state.userGuesses} oxygenBottlesUsed={this.state.oxygenBottlesBought} showModal={this.state.showModal} handleReplay={this.handleReplay}/>
+          
+            );
           }
 
           return(
               
-                  <ResultsModal isDead={this.state.roundTheyWereOnWhenTimerExpired != null} clues={this.state.clues.clues} scoreData={this.state.scoreData} userGuesses={this.state.userGuesses} oxygenBottlesUsed={this.state.oxygenBottlesUsed} showModal={this.state.showModal} handleReplay={this.handleReplay}/>
+                  <ResultsModal highScoreData={this.state.highScoreData} isDead={this.state.roundTheyWereOnWhenTimerExpired != null} clues={this.state.clues.clues} scoreData={this.state.scoreData} userGuesses={this.state.userGuesses} oxygenBottlesUsed={this.state.oxygenBottlesBought} showModal={this.state.showModal} handleReplay={this.handleReplay}/>
               
           );
         }
@@ -295,11 +458,19 @@ class GameBoard extends React.Component
                     currentRoundBeingPlayed={this.state.currentRound}
                     initializeTimers={this.state.initializeTimers}
                     onDiverClick={this.handleDiverClick}
-                    oxygenBottlesUsed={this.state.oxygenBottlesUsed}  
+                    oxygenBottlesBought={this.state.oxygenBottlesBought} 
+                    oxygenBottlesApplied={this.state.oxygenBottlesApplied}
                     timerRanOut={this.handleTimerRanOut}
                     roundTheyWereOnWhenTimerExpired={this.state.roundTheyWereOnWhenTimerExpired}
                     wordLookupFeedbackMessages={this.state.wordLookupFeedbackMessages}    
-                    resurfaceClicked={this.state.resurfaceClicked}              
+                    resurfaceClicked={this.state.resurfaceClicked}       
+                    foundTreasureInRound={this.state.foundTreasureInRound}   
+                    sharkAppearsInRound={this.state.sharkAppearsInRound}
+                    mineAppearsInRound={this.state.mineAppearsInRound}  
+                    squidAppearsInRound={this.state.squidAppearsInRound}  
+                    startTimer={this.startTimer}
+                    isDemoMode={this.state.isDemoMode}
+                    playerName={this.state.userName}
                     />   
             );
         }
@@ -309,11 +480,11 @@ var instructionsStyle = {
     //backgroundColor: 'lightblue',
     color: 'white',
     // readme: hehe 'Arial', get it?
-    fontFamily: 'Arial',
+    fontFamily: 'Courier,Helvetica,Arial',
     fontSize: '13px',
     // margin: '20px 200px 40px 200px',
-    padding: '20px',
-
+    padding: '2px',
+    minWidth: '50%',
     textAlign: 'center',
     // readme: better on mobile if no % here
     // width: '60%'
@@ -323,7 +494,7 @@ var style = {
     backgroundColor: 'lightblue',
     color: 'darkblue',
     // readme: hehe 'Arial', get it?
-    fontFamily: 'Arial',
+    fontFamily: 'Courier,Helvetica,Arial',
     fontSize: '12px',
     // margin: '20px 200px 40px 200px',
     padding: '20px',
@@ -343,7 +514,7 @@ var style = {
 var titleStyle = {
     //backgroundColor: 'lightblue',
     color: 'yellow',
-    fontFamily: 'Phosphate,Futura,Rockwell,Impact',
+    fontFamily: 'Phosphate,Impact,Helvetica,Arial',
     fontSize: '45px',
     textAlign: 'Center',
     top: '0px'

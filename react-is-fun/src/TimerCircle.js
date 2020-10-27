@@ -1,10 +1,17 @@
 // Credit: Mateusz Rybczonec
 import React, {useState, Component} from 'react';
 import './TimerCircle.css';
+import UIfx from 'uifx';
+import tickSfx from './sounds/tick.mp3'; 
+
+const tickSoundQuiet = new UIfx(tickSfx);
+tickSoundQuiet.setVolume(0.4);
+const tickSoundUrgent = new UIfx(tickSfx);
+tickSoundUrgent.setVolume(0.9);
 
 const FULL_DASH_ARRAY = 283;
-const WARNING_THRESHOLD = 10;
-const ALERT_THRESHOLD = 5;
+const WARNING_THRESHOLD = 20;
+const ALERT_THRESHOLD = 7;
 const TIMER_NEEDS_INITIALIZING = 1;
 const TIMER_HAS_BEEN_INITIALIZED = 2;
 
@@ -30,6 +37,8 @@ let timeLeft = TIME_LIMIT;
 let timerInterval =  Array(7).fill(null);
 let remainingPathColor = COLOR_CODES.info.color;
 let oxygenBottlesApplied = 0;
+let oxygenBottlesBought = 0;
+let isDemoMode = 0;
 let timerRanOutCallback = null;
 // readme: not certain I need this next variable? Because this is global to all timers it saves me passing it back to here from the GameBoard state
 // but maybe having a copy here is undesirable and i should use the state one.
@@ -39,7 +48,7 @@ function Init(uniqueKey)
 {
         // INIT;
         timerInterval =  Array(7).fill(null);
-
+        
         onTimesUp(uniqueKey);
 
         /*
@@ -61,6 +70,7 @@ function ResetTimer(calledBy)
   //readme: reset the shared static timer vars - be careful when calling this as don't want to reset in between rounds 
   timePassed = 0;
   timeLeft = TIME_LIMIT;
+  oxygenBottlesApplied = 0;
 }
 
 function AddToTimer(sec)
@@ -70,6 +80,7 @@ function AddToTimer(sec)
 }
 
 function onTimesUp(uniqueKey) {
+  console.log("killing timer : " + uniqueKey)
   clearInterval(timerInterval[uniqueKey]);
 }
 
@@ -77,17 +88,36 @@ function startTimer(uniqueKey) {
     timerInterval[uniqueKey] = setInterval(() => {
     if(document.getElementById("base-timer-label" + uniqueKey))
     {
-      timePassed = timePassed += 1;
-      timeLeft = TIME_LIMIT - timePassed;
-      // readme: only do stuff if html rendered
+      // if(oxygenBottlesApplied < oxygenBottlesBought)
+      // {
+      //     let diff = oxygenBottlesBought - oxygenBottlesApplied;
+      //     //readme : they have paid for oxygen that's not yet been used - use it!
+      //     timePassed -= (11 * diff);
+      //     oxygenBottlesApplied += diff;
+      // }
+      if(timeLeft > 0)
+      {
+        timePassed = timePassed += 1;
+        timeLeft = TIME_LIMIT - timePassed;
+      }
 
-        document.getElementById("base-timer-label" + uniqueKey).innerHTML = formatTime(
-          timeLeft
-        );
+      // readme: only do stuff if html rendered
+        if(timeLeft >= 0){
+          document.getElementById("base-timer-label" + uniqueKey).innerHTML = formatTime(
+            timeLeft
+          );
+        }
         setCircleDasharray(uniqueKey);
         setRemainingPathColor(timeLeft,uniqueKey);
 
-        if (timeLeft === 0) {
+        if(timeLeft === 0 && isDemoMode === 1)
+        {
+          alert("The timer ran out. Try and avoid that by using oxygen refills.\n Because this is the training demo we'll carry on...");
+          timeLeft = -1;
+          onTimesUp(uniqueKey);
+        }
+
+        if (timeLeft === 0 && isDemoMode === 0) {
           onTimesUp(uniqueKey);
           if(timerRanOutCallback != null && timerRanOutCallback != undefined 
             && uniqueKey != null && uniqueKey != undefined)
@@ -95,9 +125,12 @@ function startTimer(uniqueKey) {
             timerRanOutCallback(uniqueKey);
             roundTheyWereOnWhenTimerExpired = uniqueKey;
             // readme: so if the timer runs out, then here I reset the timers for the next time they might be used
-            ResetTimer("bcoz timer expired on " + uniqueKey);
+            ResetTimer("bcoz timer expired on " + uniqueKey + " oxygenApplied: " + oxygenBottlesApplied + " oxyBought: " + oxygenBottlesBought);
           }
         }
+        if (timeLeft === 10) tickSoundQuiet.play();
+        if (timeLeft === 5) tickSoundUrgent.play();
+        
     } else
     {
       // readme: hmm, I dont fully understand this - assume this else hit when doing a "Replay" and clears out stuff ahead of reusing timer class vars
@@ -157,6 +190,32 @@ class TimerCircle extends React.Component
     // am happy sharing the timer variables globally across all Timers (e.g. TimePassed and oxygenBottlesApplied are used by all 7)
 render()
     {
+      isDemoMode = this.props.isDemoMode;
+      oxygenBottlesBought = this.props.oxygenBottlesBought;
+      //console.log("uniqueKey:" + this.props.uniqueKey + " oxygenBottlesApplied:" + oxygenBottlesApplied + " oxygenBottlesBought:" + oxygenBottlesBought + " timePassed: " + timePassed)
+
+      if(oxygenBottlesApplied < oxygenBottlesBought)
+      {
+        // readme: they appear to have bought oxygen - kill current timer thread,
+        // update the global timer numbers, and start a new thread. Designed to stop race conditions.
+         
+        if(this.props.uniqueKey == this.props.currentRoundBeingPlayed){
+          // readme: stop the exact timer in question.
+          onTimesUp(this.props.uniqueKey); 
+         
+         // readme: these are global vars shared by all timers, update all.
+          let diff = oxygenBottlesBought - oxygenBottlesApplied;
+          timePassed -= (11 * diff);
+          oxygenBottlesApplied += diff;
+          console.log("oxygenBottlesApplied:" + oxygenBottlesApplied);
+          startTimer(this.props.uniqueKey);
+         }
+         else
+         {
+           //console.log("not the timer we care about: " +this.props.uniqueKey);
+         }
+      }
+
       if(this.props.initializeTimers[0] == null)
       {
         // readme: bit of an assumption - if the first timer is null, the game has been started or replayed so reset timer.
@@ -179,15 +238,6 @@ render()
         if(this.props.haltTimer)
         {   
             onTimesUp(this.props.uniqueKey);          
-        }
-
-        if(oxygenBottlesApplied < this.props.oxygenBottlesUsed &&
-            this.props.currentRoundBeingPlayed == this.props.uniqueKey)
-        {
-            //readme: 11 because it takes about 1s for the 10 to be added!
-            //readme: note the condition checking what round we are on, necessary or ALL 7 timers would think they needed to update the timer.
-            AddToTimer(11);
-            oxygenBottlesApplied++;
         }
 
         return(
